@@ -1,13 +1,5 @@
 // https://adventofcode.com/2015/day/1#part1
-/*
-*
-(()) and ()() both result in floor 0.
-((( and (()(()( both result in floor 3.
-))((((( also results in floor 3.
-()) and ))( both result in floor -1 (the first basement level).
-))) and )())()) both result in floor -3.
-*
-* */
+
 import * as _ from "@mobily/ts-belt";
 
 const path =
@@ -18,13 +10,38 @@ const moveMap = new Map([
   [")", -1],
 ]);
 
-const findFloor = (input: string) => {
+const mapMovement = (input: string) => {
   return _.pipe(
     input,
     _.S.split(""),
-    _.A.map((move) => moveMap.get(move) as number),
-    _.A.reduce(0, _.N.add)
+    _.A.map((move) => moveMap.get(move)),
+    _.A.filter(Boolean)
+  ) as number[];
+};
+
+const calculateFloorAndPosition = (data: number[]) => {
+  const initialValue: [number, number[]] = [0, []];
+
+  return _.pipe(
+    data,
+    _.A.reduceWithIndex(initialValue, (acc, next, index) => {
+      const [value, position] = acc;
+      const sum = value + next;
+
+      if (sum === -1) {
+        position.push(index + 1);
+      }
+      return [sum, position] as typeof initialValue;
+    })
   );
 };
 
-console.log(findFloor(path));
+const result = _.pipe(
+  path,
+  mapMovement,
+  calculateFloorAndPosition,
+  _.A.flat,
+  _.A.take(2)
+);
+
+console.log(result);
